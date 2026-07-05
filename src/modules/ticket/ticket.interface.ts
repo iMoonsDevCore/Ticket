@@ -1,23 +1,23 @@
 export enum TicketStatus {
-    OPEN = 'open',
-    IN_PROGRESS = 'in_progress',
-    RESOLVED = 'resolved',
-    CLOSED = 'closed'
+    OPEN = 'OPEN',
+    IN_PROGRESS = 'IN_PROGRESS',
+    RESOLVED = 'RESOLVED',
+    CLOSED = 'CLOSED'
 }
 
 export enum TicketPriority {
-    LOW = 'low',
-    MEDIUM = 'medium',
-    HIGH = 'high',
-    CRITICAL = 'critical'
+    LOW = 'LOW',
+    MEDIUM = 'MEDIUM',
+    HIGH = 'HIGH',
+    CRITICAL = 'CRITICAL'
 }
 
 export enum TicketCategory {
-    HARDWARE = 'hardware',
-    SOFTWARE = 'software',
-    NETWORK = 'network',
-    SECURITY = 'security',
-    OTHER = 'other'
+    HARDWARE = 'HARDWARE',
+    SOFTWARE = 'SOFTWARE',
+    NETWORK = 'NETWORK',
+    SECURITY = 'SECURITY',
+    OTHER = 'OTHER'
 }
 
 export interface Ticket {

@@ -29,6 +29,7 @@ enum TicketPriority {
   LOW
   MEDIUM
   HIGH
+  CRITICAL
 }
 
 model User {
@@ -50,6 +51,7 @@ model Ticket {
   description String
   status      TicketStatus   @default(OPEN)
   priority    TicketPriority   @default(LOW)
+  asignatedTo String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   userId      Int

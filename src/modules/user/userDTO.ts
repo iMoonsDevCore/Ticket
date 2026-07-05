@@ -5,5 +5,5 @@ export interface UserDTO {
     email: string,
     password: string,
     role?: UserRole,
-    refreshToken?: string
+    refreshToken?: string | null
 }
