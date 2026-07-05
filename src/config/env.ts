@@ -4,5 +4,6 @@ dotenv.config();
 
 export const env = {
     PORT: process.env.PORT || 8000,
-    DATABASE_URL: process.env.DATABASE_URL
+    DATABASE_URL: process.env.DATABASE_URL,
+    HASH_SALT: process.env.HASH_SALT || 10
 }
