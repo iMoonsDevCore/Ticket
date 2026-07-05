@@ -1,16 +1,18 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction } from "express"
+import { UserRole } from "../user/user.interface"
 
-export const verifyRole = (requiredRole: string) => {
+export const verifyRole = (...allowedRoles: UserRole[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
-        const user = req.body.user.role
 
-        if (!user) {
-            return res.status(403).json({ message: 'Forbidden: No role found' })
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" })
         }
-        
-        if (user !== requiredRole) {
-            return res.status(403).json({ message: 'Forbidden: Insufficient permissions' })
+
+
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: "Forbidden: insufficient permissions" })
         }
+
         next()
     }
 }

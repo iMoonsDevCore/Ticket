@@ -1,6 +1,11 @@
-// src/types/express.d.ts
-declare namespace Express {
-  interface Request {
-    user?: { id: number, role: string }
-  }
+import { UserRole } from "../modules/user/user.interface"
+
+declare global {
+    namespace Express {
+        interface Request {
+            user?: { id: number; role: UserRole }
+        }
+    }
 }
+
+export {}

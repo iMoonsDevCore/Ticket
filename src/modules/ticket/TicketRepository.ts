@@ -6,7 +6,7 @@ class TicketRepository {
         return await prisma.ticket.findMany()
     }
 
-    public async getTicketById(id: number){
+    public async getTicketById(id: string){
         return await prisma.ticket.findUnique({
             where: { id }
         })
@@ -20,7 +20,7 @@ class TicketRepository {
                 title: ticket.title,
                 description: ticket.description,
                 status: ticket.status,
-                priority: ticket.priority,
+                priority: ticket.priority ?? "LOW",
                 asignatedTo: assigned ?? "Nadie",
                 userId: userId
             }
@@ -36,14 +36,14 @@ class TicketRepository {
                 title: ticket.title,
                 description: ticket.description,
                 status: ticket.status,
-                priority: ticket.priority,
+                priority: ticket.priority ?? "LOW",
                 asignatedTo: ticket.assignedTo,
             }
         })
     }
 
 
-    public async deleteTicket(ticketId: number){
+    public async deleteTicket(ticketId: string){
         return await prisma.ticket.delete({
             where: {
                 id: ticketId

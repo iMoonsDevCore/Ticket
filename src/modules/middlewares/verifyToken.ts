@@ -1,28 +1,20 @@
 import { Request, Response, NextFunction } from 'express'
 import { jwtHelpers } from '../helpers/jwt'
+import { UserRole } from '../user/user.interface'
 
 export const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization
+    const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : undefined
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
         return res.status(401).json({ message: 'Unauthorized' })
     }
 
-    const token = authHeader.split(' ')[1]
-
     try {
-        const decoded = jwtHelpers.decodeToken(token)
-        const isTokenValid = jwtHelpers.verifyTemporalToken(token)
-        const isRefreshTokenValid = jwtHelpers.verifyRefreshToken(token)
-
-        if (!decoded || (!isTokenValid && !isRefreshTokenValid)) {
-            return res.status(401).json({ message: 'Invalid token' })
-        }
-
-        req.body.user = decoded
-
+        const user = jwtHelpers.verifyTemporalToken(token) as { id: number; role: UserRole }
+        req.user = user
         next()
-    } catch (error) {
+    } catch {
         return res.status(401).json({ message: 'Invalid token' })
     }
 }

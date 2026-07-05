@@ -7,8 +7,6 @@ class AuthController {
         try {
             const parsedData = userSchema.safeParse(req.body)
 
-            console.log(parsedData)
-
             if (!parsedData.success) {
                 return res.status(400).json({ message: parsedData.error })
             }
@@ -42,7 +40,8 @@ class AuthController {
             res.cookie("refreshToken", user.refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
+                sameSite: "lax",
+                path: "/",
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             })
 
@@ -59,7 +58,15 @@ class AuthController {
 
     public refreshToken = async (req: Request, res: Response) => {
         try {
-            const { refreshToken } = req.body
+            const refreshTokenFromBody = req.body?.refreshToken
+            const cookieHeader = req.headers.cookie || ""
+            const refreshTokenFromCookie = cookieHeader
+                .split(";")
+                .map((cookie) => cookie.trim())
+                .find((cookie) => cookie.startsWith("refreshToken="))
+                ?.split("=")[1]
+
+            const refreshToken = refreshTokenFromBody || decodeURIComponent(refreshTokenFromCookie || "")
 
             if (!refreshToken) {
                 return res.status(400).json({ message: "Refresh token is required" })
@@ -74,7 +81,8 @@ class AuthController {
             res.cookie("refreshToken", newToken.refreshToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === "production",
-                sameSite: "strict",
+                sameSite: "lax",
+                path: "/",
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
             })
 
@@ -90,14 +98,28 @@ class AuthController {
 
     public logoutUser = async (req: Request, res: Response) => {
         try {
-            const result = await authService.logoutUser(req.body.user.id)
+            const userId = req.user?.id
+
+            if (!userId) {
+                return res.status(401).json({ message: "Unauthorized" })
+            }
+
+            const result = await authService.logoutUser(userId)
 
             if (!result) {
                 return res.status(400).json({ message: "Failed to logout user" })
             }
+
+            res.clearCookie("refreshToken", {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                sameSite: "lax",
+                path: "/"
+            })
+
             return res.status(200).json({ message: "User logged out successfully" })
         } catch (error) {
-            
+            res.status(500).json({ message: "Internal server error" })
         }
     }
 }

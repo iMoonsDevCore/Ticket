@@ -1,11 +1,10 @@
-import { TicketStatus, TicketCategory, TicketPriority } from "../ticket.interface"
+import { TicketStatus, TicketPriority } from "@prisma/client"
 
 export interface TicketDTO {
-    id?: number
+    id?: string
     title: string
     description: string
     status: TicketStatus
-    category: TicketCategory
     assignedTo?: string | "Nadie"
-    priority: TicketPriority | "LOW",
+    priority?: TicketPriority
 }
