@@ -1,7 +1,7 @@
-enum UserRole {
-    ADMIN = 'admin',
-    TECHNICIAN = 'technician',
-    USER = 'user'
+export enum UserRole {
+    ADMIN = 'ADMIN',
+    TECHNICIAN = 'TECHNICIAN',
+    USER = 'USER'
 }
 
 export interface User {
@@ -10,6 +10,7 @@ export interface User {
     email: string,
     password: string,
     role: UserRole,
+    refreshToken?: string,
     createdAt?: Date,
     updatedAt?: Date
 }
