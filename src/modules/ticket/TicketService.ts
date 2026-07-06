@@ -1,6 +1,7 @@
 import { TicketDTO } from "./dto/TicketDTO"
 import { ticketRepository } from "./TicketRepository"
 import { internal, notFound } from "../helpers/AppError"
+import prisma from "../../config/prisma"
 
 class TicketService {
     private ticketRepository: typeof ticketRepository
@@ -26,6 +27,21 @@ class TicketService {
     }
 
     public async createTicket(userId: number, ticket: TicketDTO,){
+
+        const exist = await prisma.ticket.findFirst({
+            where: {
+                title: ticket.title,
+                userId,
+                status: {
+                    notIn: ["CLOSED", "RESOLVED"]
+                }
+            }
+        })
+
+        if(exist){
+            throw notFound("Este ticket ya existe")
+        }
+
         const newTicket = await this.ticketRepository.createTicket(ticket, userId)
 
         if(!newTicket){
@@ -35,8 +51,8 @@ class TicketService {
         return newTicket
     }
 
-    public async updateTicket(ticket: Partial<TicketDTO>){
-        const updatedTicket = await this.ticketRepository.updateTicket(ticket)
+    public async updateTicket(userId: number, ticket: Partial<TicketDTO>){
+        const updatedTicket = await this.ticketRepository.updateTicket(userId, ticket)
 
         if(!updatedTicket){
             throw internal("Error al actualizar el ticket")
@@ -46,6 +62,16 @@ class TicketService {
     }
 
     public async deleteTicket(id: string){
+
+        const exist = await prisma.ticket.findFirst({
+            where: {
+                id
+            }
+        })
+
+        if(!exist){
+            throw notFound("Este ticket no existe")
+        }
         const deletedTicket = await this.ticketRepository.deleteTicket(id)
 
         if(!deletedTicket){

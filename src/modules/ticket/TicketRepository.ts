@@ -27,10 +27,11 @@ class TicketRepository {
         })
     }
 
-    public async updateTicket(ticket: Partial<TicketDTO>){
+    public async updateTicket(userId: number,ticket: Partial<TicketDTO>){
         return await prisma.ticket.update({
             where: {
-                id: ticket.id
+                id: ticket.id,
+                userId
             },
             data: {
                 title: ticket.title,
@@ -43,10 +44,10 @@ class TicketRepository {
     }
 
 
-    public async deleteTicket(ticketId: string){
+    public async deleteTicket(id: string){
         return await prisma.ticket.delete({
             where: {
-                id: ticketId
+                id
             }
         })
     }

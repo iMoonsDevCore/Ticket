@@ -25,4 +25,14 @@ ticketRouter.post("/create",
     ticketController.createTicket
 )
 
+ticketRouter.put("/update/:id", 
+    verifyToken,
+    verifyRole(UserRole.ADMIN, UserRole.TECHNICIAN),
+    ticketController.updateTicket
+)
 
+ticketRouter.delete("/delete/:id",
+    verifyToken,
+    verifyRole(UserRole.ADMIN, UserRole.TECHNICIAN),
+    ticketController.deleteTicket
+)

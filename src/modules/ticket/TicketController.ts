@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express"
 import { ticketService } from "./TicketService"
 import { createTicketSchema } from "./schemas/TicketSchema"
 
-
 class TicketController {
     private ticketService: typeof ticketService
 
@@ -10,16 +9,20 @@ class TicketController {
         this.ticketService = ticketService
     }
 
-    public getAllTickets = async (req: Request, res: Response) => {
+    public getAllTickets = async (req: Request, res: Response, next: NextFunction) => {
         try {
             const tickets = await this.ticketService.getAllTickets()
+
+            if(!tickets.length){
+                return res.status(200)
+            }
 
             return res.status(200).json({
                 success: true,
                 data: tickets,
             })
         } catch (error) {
-            console.error(error)
+            next(error)
             return res.status(500).json({
                 success: false,
                 message: "Error al obtener los tickets",
@@ -52,11 +55,13 @@ class TicketController {
 
             const taskData = parsedData.data
 
-            if (!req.user) {
-                return res.status(401).json({ message: "Unauthorized" })
+            const userId = req.user?.id 
+
+            if(!userId){
+                return false
             }
 
-            const newTicket = await this.ticketService.createTicket(req.user.id, {
+            const newTicket = await this.ticketService.createTicket(userId, {
                 id: taskData.id,
                 title: taskData.title,
                 description: taskData.description,
@@ -73,6 +78,51 @@ class TicketController {
         } catch (error) {
             next(error)
             return res.status(500)
+        }
+    }
+
+    public updateTicket = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const id = req.params.id as string
+            const { title, description, status, priority, assignedTo } = req.body
+            const userId = req.user?.id 
+
+            if(!userId){
+                return false
+            }
+
+            const updateTicket = await this.ticketService.updateTicket(userId, {
+                id,
+                title,
+                description,
+                status,
+                priority,
+                assignedTo
+            })
+
+            return res.status(200).json({
+                success: true,
+                updateTicket
+            })
+        } catch (error: any) {
+            next(error)
+            res.status(500)
+        }
+    }
+
+    public deleteTicket = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+
+            const id = req.params.id as string
+            const deleteTicket = await this.ticketService.deleteTicket(id)
+
+            return res.status(200).json({
+                success: true,
+                deleteTicket
+            })
+        } catch (error) {
+            next(error)
+            res.status(500)
         }
     }
 }

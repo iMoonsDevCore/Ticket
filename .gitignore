@@ -3,7 +3,6 @@ node_modules
 .env
 
 # Prisma generated files and local databases
-src/generated/prisma/
 generated/prisma/
 prisma/*.db
 prisma/*.db-journal
