@@ -10,4 +10,5 @@ export const env = {
     JWT_TEMPORAL_EXPIRES_IN: process.env.JWT_TEMPORAL_EXPIRES_IN || "1h",
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "dev_refresh_secret_change_me",
     JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
+    CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:3000,http://localhost:5173,http://localhost:8000",
 }
