@@ -29,6 +29,7 @@ enum TicketPriority {
   LOW
   MEDIUM
   HIGH
+  CRITICAL
 }
 
 model User {
@@ -45,11 +46,12 @@ model User {
 }
 
 model Ticket {
-  id          Int      @id @default(autoincrement())
+  id          String    @id @default(uuid())
   title       String
   description String
   status      TicketStatus   @default(OPEN)
   priority    TicketPriority   @default(LOW)
+  asignatedTo String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   userId      Int
@@ -58,11 +60,11 @@ model Ticket {
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
+  id        String      @id @default(uuid())
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  ticketId  Int
+  ticketId  String
   ticket    Ticket   @relation(fields: [ticketId], references: [id])
   userId Int
   user   User @relation(fields: [userId], references: [id])

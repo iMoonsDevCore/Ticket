@@ -3,11 +3,11 @@ import { env } from "../../config/env";
 
 class JwtHelpers {
     public generateToken = (payload: any) => {
-        return jwt.sign(payload, env.JWT_TEMPORAL_SECRET as string, { expiresIn: "1h" });
+        return jwt.sign(payload, env.JWT_TEMPORAL_SECRET as string, { expiresIn: env.JWT_TEMPORAL_EXPIRES_IN || "1h" });
     }
 
     public generateRefreshToken = (payload: any) => {
-        return jwt.sign(payload, env.JWT_REFRESH_SECRET as string, { expiresIn: "7d" });
+        return jwt.sign(payload, env.JWT_REFRESH_SECRET as string, { expiresIn: env.JWT_REFRESH_EXPIRES_IN || "7d" });
     }
 
     public verifyTemporalToken = (token: string) => {

@@ -1,11 +1,11 @@
-import prisma from "../../config/prisma"
-import { env }  from "../../config/env"
+import { env } from "../../config/env"
 import { UserDTO } from "@/modules/user/userDTO"
 import { UserLoginDTO } from "./dto/UserLoginDTO"
 import { UserRole } from "../user/user.interface"
 import { authRepository } from "./AuthRepository"
 import bcrypt from "bcryptjs"
 import { jwtHelpers } from "../helpers/jwt"
+import { createHash, timingSafeEqual } from "crypto"
 
 class AuthService {
 
@@ -13,6 +13,33 @@ class AuthService {
 
     constructor() {
         this.authRepository = authRepository
+    }
+
+    private hashToken = (token: string) => {
+        return createHash("sha256").update(token).digest("hex")
+    }
+
+    private compareTokens = (storedToken: string, incomingToken: string) => {
+        const storedBuffer = Buffer.from(storedToken)
+        const incomingBuffer = Buffer.from(incomingToken)
+
+        if (storedBuffer.length !== incomingBuffer.length) {
+            return false
+        }
+
+        return timingSafeEqual(storedBuffer, incomingBuffer)
+    }
+
+    private compareAgainstStoredHash = (storedToken: string, incomingToken: string) => {
+        const incomingHash = this.hashToken(incomingToken)
+        const storedBuffer = Buffer.from(storedToken)
+        const incomingBuffer = Buffer.from(incomingHash)
+
+        if (storedBuffer.length !== incomingBuffer.length) {
+            return false
+        }
+
+        return timingSafeEqual(storedBuffer, incomingBuffer)
     }
     
     public static findUser = async (email: string) => {
@@ -25,27 +52,42 @@ class AuthService {
         return find
     }
 
-    public refreshToken = async (userId: number) => {
+    public refreshToken = async (refreshToken: string) => {
         try {
-            const user = await authRepository.getTokenByUserId(userId)
+            const decoded = jwtHelpers.verifyRefreshToken(refreshToken) as { id?: number; role?: UserRole }
+
+            if (!decoded || typeof decoded.id !== "number") {
+                return false
+            }
+
+            const user = await authRepository.getTokenByUserId(decoded.id)
 
             if (!user || !user.refreshToken) {
                 return false
             }
 
-            const decoded = jwtHelpers.verifyRefreshToken(user.refreshToken)
+            const storedRefreshToken = user.refreshToken
+            const storedPayload = jwtHelpers.verifyRefreshToken(refreshToken) as { id?: number; role?: UserRole }
 
-            if (!decoded) {
+            if (!storedPayload || storedPayload.id !== decoded.id) {
+                await authRepository.updateUser(decoded.id, { refreshToken: null })
                 return false
             }
 
-            const newToken = jwtHelpers.generateToken({ id: userId, role: (decoded as any).role })
+            const isValidRefreshToken = this.compareTokens(storedRefreshToken, refreshToken) || this.compareAgainstStoredHash(storedRefreshToken, refreshToken)
 
-            await authRepository.updateUser(userId, { refreshToken: user.refreshToken })
+            if (!isValidRefreshToken) {
+                await authRepository.updateUser(decoded.id, { refreshToken: null })
+                return false
+            }
 
-            return { token: newToken, refreshToken: user.refreshToken }
+            const role = user.role ?? decoded.role ?? storedPayload.role ?? UserRole.USER
+            const newToken = jwtHelpers.generateToken({ id: decoded.id, role })
+
+            return { token: newToken, refreshToken }
         } catch (error: any) {
-            console.log(error)
+            console.error("Error refreshing token:", error)
+            return false
         }
     }
 
@@ -58,7 +100,7 @@ class AuthService {
                 return false
             }
 
-            const hashed = await bcrypt.hash(data.password, env.HASH_SALT)
+            const hashed = await bcrypt.hash(data.password, 10)
 
             const createdData = await authRepository.registerUser({
                 email: data.email,
@@ -91,12 +133,24 @@ class AuthService {
             
             const token = jwtHelpers.generateToken({ id: user.id, role: user.role })
             const refreshToken = jwtHelpers.generateRefreshToken({ id: user.id, role: user.role })
+            const hashedRefreshToken = this.hashToken(refreshToken)
 
-            await authRepository.updateUser(user.id, { refreshToken })
+            await authRepository.updateUser(user.id, { refreshToken: hashedRefreshToken })
 
             return { token, refreshToken }
         } catch (error) {
             console.error("Error occurred while logging in user:", error)
+            return false
+        }
+    }
+
+    public async logoutUser(userId: number){
+        try {
+            const updatedUser = await authRepository.updateUser(userId, { refreshToken: null })
+
+            return !!updatedUser
+        } catch (error: any) {
+            console.log(error)
             return false
         }
     }
