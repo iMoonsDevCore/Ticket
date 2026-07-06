@@ -13,20 +13,13 @@ class TicketController {
         try {
             const tickets = await this.ticketService.getAllTickets()
 
-            if(!tickets.length){
-                return res.status(200)
-            }
-
             return res.status(200).json({
                 success: true,
                 data: tickets,
             })
         } catch (error) {
             next(error)
-            return res.status(500).json({
-                success: false,
-                message: "Error al obtener los tickets",
-            })
+            res.status(500)
         }
     }
 

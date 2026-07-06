@@ -11,3 +11,21 @@ commentRouter.get("/",
      verifyRole(UserRole.TECHNICIAN, UserRole.ADMIN),
      commentController.getAllComment
     )
+
+commentRouter.post("/created/:id", 
+     verifyToken,
+     verifyRole(UserRole.USER, UserRole.TECHNICIAN, UserRole.ADMIN),
+     commentController.createComment
+)
+
+commentRouter.put("/edit/:id",
+     verifyToken,
+     verifyRole(UserRole.USER, UserRole.TECHNICIAN, UserRole.ADMIN),
+     commentController.updateComment
+)
+
+commentRouter.delete("/:id",
+     verifyToken,
+     verifyRole(UserRole.USER, UserRole.TECHNICIAN, UserRole.ADMIN),
+     commentController.deleteComment
+)

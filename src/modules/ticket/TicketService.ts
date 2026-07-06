@@ -13,6 +13,10 @@ class TicketService {
     public async getAllTickets(){
         const tickets = await this.ticketRepository.getALlTickets()
 
+        if(!tickets.length){
+            throw notFound("No hay tickets creados")
+        }
+
         return tickets
     }
 

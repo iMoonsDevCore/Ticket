@@ -1,11 +1,11 @@
 import prisma from "../../config/prisma"
 
 class CommentsRepository {
-    public async getAllComments(){
+    public async getAllComments() {
         return await prisma.comment.findMany()
     }
 
-    public async getAllCommentsByTicketId(ticketId: string){
+    public async getAllCommentsByTicketId(ticketId: string) {
         return await prisma.comment.findMany({
             where: {
                 ticketId
@@ -21,7 +21,7 @@ class CommentsRepository {
         })
     }
 
-    public async createComment(ticketId: string, userId: number, content: string){
+    public async createComment(ticketId: string, userId: number, content: string) {
         return await prisma.comment.create({
             data: {
                 ticketId,
@@ -31,8 +31,16 @@ class CommentsRepository {
         })
     }
 
-    public async deleteCommnet(id: number){
-        await prisma.comment.delete({
+    public async updateComment(id: string, userId: number, content: string) {
+
+        return await prisma.comment.update({
+            where: { id },
+            data: { content }
+        })
+    }
+
+    public async deleteCommnet(id: string) {
+        return await prisma.comment.delete({
             where: {
                 id
             }

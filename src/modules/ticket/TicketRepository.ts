@@ -2,17 +2,29 @@ import prisma from "../../config/prisma"
 import { TicketDTO } from "./dto/TicketDTO"
 
 class TicketRepository {
-    public async getALlTickets(){
-        return await prisma.ticket.findMany()
+    public async getALlTickets() {
+        return await prisma.ticket.findMany({
+            orderBy: { createdAt: 'desc' },
+            include: {
+                comments: {
+                    select: {
+                        content: true,
+                        user: {
+                            select: { id: true, name: true }
+                        }
+                    }
+                }
+            }
+        })
     }
 
-    public async getTicketById(id: string){
+    public async getTicketById(id: string) {
         return await prisma.ticket.findUnique({
             where: { id }
         })
     }
 
-    public async createTicket(ticket: TicketDTO, userId: number){
+    public async createTicket(ticket: TicketDTO, userId: number) {
 
         const assigned = ticket.assignedTo as string
         return await prisma.ticket.create({
@@ -27,7 +39,7 @@ class TicketRepository {
         })
     }
 
-    public async updateTicket(userId: number,ticket: Partial<TicketDTO>){
+    public async updateTicket(userId: number, ticket: Partial<TicketDTO>) {
         return await prisma.ticket.update({
             where: {
                 id: ticket.id,
@@ -44,7 +56,7 @@ class TicketRepository {
     }
 
 
-    public async deleteTicket(id: string){
+    public async deleteTicket(id: string) {
         return await prisma.ticket.delete({
             where: {
                 id
