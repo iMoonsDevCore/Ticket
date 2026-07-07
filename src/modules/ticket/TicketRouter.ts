@@ -68,6 +68,11 @@ ticketRouter.get("/",
     ticketController.getAllTickets
 )
 
+ticketRouter.get("/filter",
+    verifyToken, 
+    verifyRole(UserRole.TECHNICIAN, UserRole.ADMIN),
+    ticketController.getTicketByFilter
+)
 /**
  * @swagger
  * /tickets/{id}:

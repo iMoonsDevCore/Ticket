@@ -63,6 +63,12 @@ class TicketRepository {
             }
         })
     }
+
+    public async getTicketByFilter(where: {}){
+        return await prisma.ticket.findMany({
+            where
+        })
+    }
 }
 
 export const ticketRepository = new TicketRepository()

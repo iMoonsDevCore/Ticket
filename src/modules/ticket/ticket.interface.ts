@@ -34,3 +34,9 @@ export interface Ticket {
     closedAt?: Date,
     resolvedAt?: Date,
 }
+
+export interface GetTicketsFilter {
+    status?: TicketStatus;
+    priority?: TicketPriority;
+    authorId?: string;
+}

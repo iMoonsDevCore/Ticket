@@ -1,6 +1,7 @@
 import { TicketDTO } from "./dto/TicketDTO"
 import { ticketRepository } from "./TicketRepository"
 import { internal, notFound } from "../helpers/AppError"
+import { GetTicketsFilter } from "./ticket.interface"
 import prisma from "../../config/prisma"
 
 class TicketService {
@@ -18,6 +19,12 @@ class TicketService {
         }
 
         return tickets
+    }
+
+    public async getTicketByFilter(filter: GetTicketsFilter){
+        const filteredTickets = await this.ticketRepository.getTicketByFilter(filter)
+
+        return filteredTickets
     }
 
     public async getTicketById(id: string){

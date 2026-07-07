@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express"
 import { ticketService } from "./TicketService"
 import { createTicketSchema } from "./schemas/TicketSchema"
+import { getTicketsFilterSchema } from "./schemas/FilterTicketSchema"
 
 class TicketController {
     private ticketService: typeof ticketService
@@ -34,6 +35,22 @@ class TicketController {
                 data: ticket
             })
         } catch (error) {
+            next(error)
+        }
+    }
+
+    public getTicketByFilter = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const filter = getTicketsFilterSchema.parse(req.query)
+
+            const filteredTicket = await this.ticketService.getTicketByFilter(filter)
+
+            return res.status(200).json({
+                success: true,
+                filteredTicket
+            })
+        } catch (error) {
+            console.log(error)
             next(error)
         }
     }
